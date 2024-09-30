@@ -24,7 +24,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AndroidWorkshop"
+rootProject.name = "InhollandExcersises"
 include(":exercise1")
 include(":exercise2")
 include(":exercise3")
