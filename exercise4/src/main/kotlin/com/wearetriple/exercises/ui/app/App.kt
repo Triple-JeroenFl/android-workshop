@@ -6,7 +6,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.wearetriple.exercises.ui.screens.JokeScreen
+import com.wearetriple.exercises.ui.screens.PokemonOverviewScreen
+import com.wearetriple.exercises.ui.theme.InhollandExcersisesTheme
 
 @Composable
 fun App() {
@@ -15,6 +16,8 @@ fun App() {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        JokeScreen()
+        InhollandExcersisesTheme {
+            PokemonOverviewScreen()
+        }
     }
 }
