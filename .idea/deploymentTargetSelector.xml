@@ -13,6 +13,14 @@
       </SelectionState>
       <SelectionState runConfigName="exercise4">
         <option name="selectionMode" value="DROPDOWN" />
+        <DropdownSelection timestamp="2024-10-03T09:23:56.175392Z">
+          <Target type="DEFAULT_BOOT">
+            <handle>
+              <DeviceId pluginId="PhysicalDevice" identifier="serial=RZ8T30PAWWW" />
+            </handle>
+          </Target>
+        </DropdownSelection>
+        <DialogSelection />
       </SelectionState>
       <SelectionState runConfigName="PokemonCard">
         <option name="selectionMode" value="DROPDOWN" />

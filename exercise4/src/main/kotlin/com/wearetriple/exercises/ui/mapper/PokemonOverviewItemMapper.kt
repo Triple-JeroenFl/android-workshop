@@ -13,13 +13,13 @@ class PokemonOverviewItemMapper @Inject constructor(
     }
 
     fun map(entity: PokemonOverviewItemResponse, storedFavoritesIds: List<String>): PokemonOverviewItem? {
-        val id = entity.url?.let(ID_REGEX::findAll)?.lastOrNull()?.value?.toIntOrNull() ?: return null
+        val id = entity.url?.let(ID_REGEX::findAll)?.lastOrNull()?.value ?: return null
         val name = entity.name ?: return null
         return PokemonOverviewItem(
-            id = id.toString(),
+            id = id,
             name = name,
             image = imageMapper.getSpriteURL(id),
-            isFavorite = storedFavoritesIds.contains(id.toString())
+            isFavorite = storedFavoritesIds.contains(id)
         )
     }
 }

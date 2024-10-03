@@ -12,19 +12,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.wearetriple.exercises.ui.model.display.PokemonOverviewItemDisplay
+import com.wearetriple.exercises.ui.theme.Dimensions
+import com.wearetriple.workshop.R
 
 @Composable
 fun PokemonOverviewListItem(
@@ -37,7 +35,7 @@ fun PokemonOverviewListItem(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(148.dp)
+            .height(Dimensions.pokemonListItemHeight)
             .clickable {
                 if (isFavorited.value) {
                     onUnFavorite(display.id)
@@ -49,10 +47,8 @@ fun PokemonOverviewListItem(
         ,
         contentAlignment = Alignment.Center
     ) {
-        AsyncImage(
-            contentDescription = "Pokemon image",
-            modifier = Modifier.fillMaxSize(),
-            model = display.imageUrl
+        PokemonImage(
+            pokemonImageUrl = display.imageUrl
         )
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -67,6 +63,21 @@ fun PokemonOverviewListItem(
 }
 
 @Composable
+private fun PokemonImage(
+    pokemonImageUrl: String
+) {
+    val pokeBall = painterResource(R.drawable.pokemon_placeholder)
+    AsyncImage(
+        placeholder = pokeBall,
+        error = pokeBall,
+        fallback = pokeBall,
+        contentDescription = "Pokemon image",
+        modifier = Modifier.fillMaxSize(),
+        model = pokemonImageUrl
+    )
+}
+
+@Composable
 private fun NameChip(
     modifier: Modifier = Modifier,
     isFavorited: Boolean,
@@ -76,16 +87,16 @@ private fun NameChip(
         modifier = modifier
             .background(
                 color = Color.Black,
-                shape = RoundedCornerShape(64.dp)
+                shape = RoundedCornerShape(Dimensions.roundedCornerSize)
             )
             .border(
-                width = if (isFavorited) 4.dp else 0.dp,
+                width = if (isFavorited) Dimensions.pokomonFavoritedBorderWidth else Dimensions.pokemonUnFavoritedBorderWidth,
                 color = if (isFavorited) Color.Yellow else Color.Unspecified,
-                shape = RoundedCornerShape(64.dp)
+                shape = RoundedCornerShape(Dimensions.roundedCornerSize)
             )
             .padding(
-                vertical = 8.dp,
-                horizontal = 16.dp
+                vertical = Dimensions.Paddings.small,
+                horizontal = Dimensions.Paddings.large
             ),
         contentAlignment = Alignment.Center
     ) {

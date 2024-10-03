@@ -3,6 +3,8 @@ package com.wearetriple.exercises.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -12,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.wearetriple.exercises.ui.components.Error
 import com.wearetriple.exercises.ui.components.PokemonOverviewList
+import com.wearetriple.exercises.ui.theme.Dimensions
 import com.wearetriple.exercises.ui.viewmodel.PokeDexViewModel
 
 @Composable
@@ -27,7 +30,13 @@ fun PokemonOverviewScreen(
     ) {
         when (val currentState = state.value) {
             is PokeDexViewModel.State.Error -> {
-                Error(message = currentState.exception)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Dimensions.Paddings.large)
+                ) {
+                    Error(message = currentState.exception)
+                }
             }
             PokeDexViewModel.State.Loading -> {
                 CircularProgressIndicator()

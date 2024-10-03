@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
+import com.wearetriple.exercises.ui.theme.Dimensions
 import com.wearetriple.exercises.ui.theme.InhollandExcersisesTheme
 import com.wearetriple.workshop.R
 
@@ -30,9 +30,9 @@ fun Error(
             .fillMaxWidth()
             .background(
                 color = MaterialTheme.colorScheme.errorContainer,
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(Dimensions.Paddings.large)
             )
-            .padding(24.dp),
+            .padding(Dimensions.Paddings.x_large),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -44,7 +44,7 @@ fun Error(
             textAlign = TextAlign.Center
         )
         Spacer(
-            modifier = Modifier.height(16.dp)
+            modifier = Modifier.height(Dimensions.Paddings.large)
         )
         message?.let {
             Text(

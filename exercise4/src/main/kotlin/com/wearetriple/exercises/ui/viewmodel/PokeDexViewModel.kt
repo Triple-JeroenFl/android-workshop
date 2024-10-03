@@ -6,9 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.squareup.moshi.Moshi
 import com.wearetriple.exercises.ui.mapper.PokemonOverviewDisplayMapper
 import com.wearetriple.exercises.ui.mapper.PokemonOverviewMapper
+import com.wearetriple.exercises.ui.mapper.ResponseMapper
 import com.wearetriple.exercises.ui.model.display.PokemonOverviewDisplay
 import com.wearetriple.exercises.ui.model.domain.PokemonOverview
 import com.wearetriple.exercises.ui.model.domain.PokemonOverviewItem
+import com.wearetriple.exercises.ui.model.response.PokemonOverviewResponse
 import com.wearetriple.exercises.ui.service.PokemonService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -20,6 +22,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.Cache
 import okhttp3.OkHttpClient
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
@@ -31,6 +34,7 @@ class PokeDexViewModel @Inject constructor(
     private val pokemonOverviewDisplayMapper: PokemonOverviewDisplayMapper,
     @ApplicationContext private val context: Context,
     private val moshi: Moshi,
+    private val responseMapper: ResponseMapper
 ) : ViewModel() {
 
     companion object {
@@ -47,13 +51,9 @@ class PokeDexViewModel @Inject constructor(
     val state: StateFlow<State> = mutableState.asStateFlow()
 
     private val retrofit = buildRetrofit(BASE_URL)
-
     private val service = retrofit.create(PokemonService::class.java)
-
     private var currentBatch = 0
-
     private val sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
-
     private val fetchedPokemons: MutableList<PokemonOverviewItem> = mutableListOf()
 
     init {
@@ -65,28 +65,42 @@ class PokeDexViewModel @Inject constructor(
 
     private fun fetchPokemonOverview(batch: Int, isLoadingMore: Boolean) {
         viewModelScope.launch {
-            if (isLoadingMore) {
-                val currentState = mutableState.value
-                if (currentState is State.Success) {
-                    mutableState.emit(State.Success(currentState.display, isLoadingMore = true))
-                }
-            } else {
-                mutableState.emit(State.Loading)
-            }
+            if (isLoadingMore) setStateToLoadingMore() else setStateToLoading()
             performCall(batch)
                 .onSuccess { pokemonOverview ->
-                    fetchedPokemons.addAll(pokemonOverview.results)
-                    val display = pokemonOverviewDisplayMapper.map(
-                        domain = pokemonOverview.copy(
-                            results = fetchedPokemons
-                        )
-                    )
-                    mutableState.emit(State.Success(display, isLoadingMore = false))
+                    onFetchedPokemons(pokemonOverview)
                 }
-                .onFailure { exception ->
-                    mutableState.emit(State.Error(exception.message ?: ""))
+                .onFailure { throwable ->
+                    onFetchFailure(throwable)
                 }
         }
+    }
+
+    private suspend fun setStateToLoadingMore() {
+        val currentState = mutableState.value
+        if (currentState is State.Success) {
+            mutableState.emit(State.Success(currentState.display, isLoadingMore = true))
+        }
+    }
+
+    private suspend fun setStateToLoading() {
+        mutableState.emit(State.Loading)
+    }
+
+    private suspend fun onFetchedPokemons(pokemonOverview: PokemonOverview) {
+        fetchedPokemons.addAll(pokemonOverview.results)
+        val display = pokemonOverviewDisplayMapper.map(
+            domain = pokemonOverview.copy(
+                results = fetchedPokemons
+            )
+        )
+        mutableState.emit(State.Success(display, isLoadingMore = false))
+    }
+
+    private suspend fun onFetchFailure(
+        throwable: Throwable
+    ) {
+        mutableState.emit(State.Error(throwable.message ?: ""))
     }
 
     fun fetchMorePokemons() {
@@ -103,12 +117,14 @@ class PokeDexViewModel @Inject constructor(
             offset = batch * FETCH_LIMIT
         )
     }.mapCatching { response ->
-        if (response.isSuccessful) {
-            val responseBody = response.body()
-            if (responseBody == null) {
-                throw NullPointerException("$TAG: response was null")
-            } else pokemonOverviewMapper.map(responseBody, batch, getFavorites())
-        } else throw BackendException("$TAG: Failed to fetch pokemon data from BE: ${response.code()}")
+        handleResponse(response, batch)
+            .getOrThrow()
+    }
+
+    private fun handleResponse(response: Response<PokemonOverviewResponse>, batch: Int): Result<PokemonOverview> = runCatching {
+        responseMapper.map(response).map {
+            pokemonOverviewMapper.map(it, batch, getFavorites())
+        }.getOrThrow()
     }
 
     private fun buildOkHttpClient(): OkHttpClient {
@@ -132,7 +148,7 @@ class PokeDexViewModel @Inject constructor(
         with(sharedPreferences.edit()) {
             val jsonString = Json.encodeToString<List<String>>(list)
             putString(SHARED_PREFERENCES_POKEMONS_FAVORITED_KEY, jsonString)
-        }.commit()
+        }.apply()
     }
 
     fun storeFavorite(id: String) {
@@ -156,21 +172,15 @@ class PokeDexViewModel @Inject constructor(
         }
     }
 
-    data class BackendException(
-        override val message: String?
-    ) : Exception(message)
-
     sealed class State {
         data class Success(
             val display: PokemonOverviewDisplay,
             val isLoadingMore: Boolean
         ) : State()
-
         data object Loading : State()
         data class Error(
             val exception: String
         ) : State()
-
         data object Initial : State()
     }
 }

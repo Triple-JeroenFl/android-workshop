@@ -22,8 +22,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import com.wearetriple.exercises.ui.model.display.PokemonOverviewDisplay
+import com.wearetriple.exercises.ui.theme.Dimensions
 
 @Composable
 fun PokemonOverviewList(
@@ -37,17 +37,14 @@ fun PokemonOverviewList(
     val lastVisibleIndex = remember { derivedStateOf { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index } }
     LaunchedEffect(key1 = lastVisibleIndex.value) {
         lastVisibleIndex.value?.let {
-            if(display.list.size - it < 6)
-            {
-                onFetchMoreData()
-            }
+            if(display.list.size - it < 6) onFetchMoreData()
         }
     }
     LazyColumn(
         state = listState,
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp)
+            .padding(horizontal = Dimensions.Paddings.x_large)
             .statusBarsPadding()
             .navigationBarsPadding()
     ) {
@@ -57,13 +54,11 @@ fun PokemonOverviewList(
                 onFavorite = onFavorite,
                 onUnFavorite = onUnFavorite
             )
-            if (index != display.list.lastIndex) {
-                Spacer(Modifier.height(16.dp))
-            }
+            if (index != display.list.lastIndex) Spacer(Modifier.height(Dimensions.Paddings.large))
         }
         if (isLoadingMore) {
             item {
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(Dimensions.Paddings.large))
                 LoadingMoreIndicator()
             }
         }
@@ -77,13 +72,13 @@ private fun LoadingMoreIndicator() {
             .fillMaxWidth()
             .background(
                 color = Color.Black,
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(Dimensions.Paddings.large)
             )
-            .padding(16.dp),
+            .padding(Dimensions.Paddings.large),
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator(
-            modifier = Modifier.size(48.dp),
+            modifier = Modifier.size(Dimensions.Paddings.xxx_large),
             color = Color.White
         )
     }
