@@ -34,9 +34,7 @@ class JokeViewModel @Inject constructor(
     private val mutableJoke: MutableStateFlow<JokeResponse?> = MutableStateFlow(null)
     val joke: StateFlow<JokeResponse?> = mutableJoke.asStateFlow()
 
-    private val retrofit = buildRetrofit(
-        url = BASE_URL
-    )
+    private val retrofit = buildRetrofit(BASE_URL)
     private val service = retrofit.create(JokeService::class.java)
 
     init {

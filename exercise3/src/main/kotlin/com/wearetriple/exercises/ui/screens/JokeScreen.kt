@@ -11,11 +11,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.wearetriple.exercises.ui.components.Joke
 import com.wearetriple.exercises.ui.model.JokeFlagsResponse
 import com.wearetriple.exercises.ui.model.JokeResponse
+import com.wearetriple.exercises.ui.theme.Dimensions
 import com.wearetriple.exercises.ui.theme.InhollandExcersisesTheme
 import com.wearetriple.exercises.ui.viewmodel.JokeViewModel
 
@@ -36,8 +36,7 @@ private fun ScreenContent(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp)
-        ,
+            .padding(Dimensions.Paddings.large),
         contentAlignment = Alignment.Center
     ) {
         if (joke == null) {

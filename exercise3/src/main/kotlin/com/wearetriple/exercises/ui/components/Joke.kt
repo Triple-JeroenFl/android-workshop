@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.wearetriple.exercises.ui.model.JokeFlagsResponse
 import com.wearetriple.exercises.ui.model.JokeResponse
+import com.wearetriple.exercises.ui.theme.Dimensions
 
 @Composable
 fun Joke(
@@ -25,10 +26,10 @@ fun Joke(
         modifier
             .background(
                 color = MaterialTheme.colorScheme.primary,
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(Dimensions.roundedCornerSize)
             )
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(Dimensions.Paddings.large),
         contentAlignment = Alignment.Center
     ) {
         Text(
