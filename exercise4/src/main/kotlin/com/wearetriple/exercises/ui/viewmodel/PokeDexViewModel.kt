@@ -1,6 +1,11 @@
 package com.wearetriple.exercises.ui.viewmodel
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.squareup.moshi.Moshi
@@ -17,6 +22,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -43,8 +51,12 @@ class PokeDexViewModel @Inject constructor(
         private const val NETWORK_TIMEOUT = 30
         private const val FETCH_LIMIT = 20
         private const val BASE_URL = "https://pokeapi.co/api/v2/"
+        //<<<<< Legacy >>>>>
         private const val SHARED_PREFERENCES_NAME = "com.wearetriple.exercises.shared.prefs.pokemons_favorited"
         private const val SHARED_PREFERENCES_POKEMONS_FAVORITED_KEY = "pokemons_favorited_key"
+        //>>>>><<<<<
+        private const val DATA_STORE_NAME = "com.wearetriple.exercises.data.store.preferences.pokemons.favorited"
+        private val DATA_STORE_POKEMONS_FAVORITED_KEY = stringPreferencesKey("pokemons_favorited_key")
     }
 
     private val mutableState = MutableStateFlow<State>(State.Initial)
@@ -53,7 +65,10 @@ class PokeDexViewModel @Inject constructor(
     private val retrofit = buildRetrofit(BASE_URL)
     private val service = retrofit.create(PokemonService::class.java)
     private var currentBatch = 0
+    // <<<< legacy >>>>
     private val sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+    // >>>>><<<<<
+    val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = DATA_STORE_NAME)
     private val fetchedPokemons: MutableList<PokemonOverviewItem> = mutableListOf()
 
     init {
@@ -121,7 +136,7 @@ class PokeDexViewModel @Inject constructor(
             .getOrThrow()
     }
 
-    private fun handleResponse(response: Response<PokemonOverviewResponse>, batch: Int): Result<PokemonOverview> = runCatching {
+    private suspend fun handleResponse(response: Response<PokemonOverviewResponse>, batch: Int): Result<PokemonOverview> = runCatching {
         responseMapper.map(response).map {
             pokemonOverviewMapper.map(it, batch, getFavorites())
         }.getOrThrow()
@@ -145,25 +160,69 @@ class PokeDexViewModel @Inject constructor(
     }
 
     private fun storeFavorites(list: List<String>) {
+        viewModelScope.launch {
+            context.dataStore.edit { preferences ->
+                preferences[DATA_STORE_POKEMONS_FAVORITED_KEY] = Json.encodeToString<List<String>>(list)
+            }
+        }
+    }
+
+    fun storeFavorite(id: String) {
+        viewModelScope.launch {
+            val currentFavorites = getFavorites().toMutableList()
+            currentFavorites.add(id)
+            storeFavorites(currentFavorites)
+        }
+    }
+
+    fun removeFavorite(id: String) {
+        viewModelScope.launch {
+            val currentFavorites = getFavorites().toMutableList()
+            currentFavorites.remove(id)
+            storeFavorites(currentFavorites)
+        }
+    }
+
+    private suspend fun getFavorites() : List<String> {
+        val flow = context.dataStore.data
+            .catch { throwable ->
+                println("$TAG - error fetching datastore data: $throwable")
+            }
+            .map { preferences ->
+                preferences[DATA_STORE_POKEMONS_FAVORITED_KEY] ?: null
+            }
+        try {
+            val jsonString = flow.first()
+            return jsonString?.let {
+                Json.decodeFromString<List<String>>(it)
+            } ?: emptyList()
+        } catch (exc: Exception) {
+            println("$TAG - error while processing data from store: $exc")
+            return emptyList()
+        }
+    }
+
+    //<<<<< Legacy - SharedPreferences >>>>>
+    private fun storeFavoritesLegacy(list: List<String>) {
         with(sharedPreferences.edit()) {
             val jsonString = Json.encodeToString<List<String>>(list)
             putString(SHARED_PREFERENCES_POKEMONS_FAVORITED_KEY, jsonString)
         }.apply()
     }
 
-    fun storeFavorite(id: String) {
-        val currentFavorites = getFavorites()
+    fun storeFavoriteLegacy(id: String) {
+        val currentFavorites = getFavoritesLegacy()
         currentFavorites.add(id)
-        storeFavorites(currentFavorites)
+        storeFavoritesLegacy(currentFavorites)
     }
 
-    fun removeFavorite(id: String) {
-        val currentFavorites = getFavorites()
+    fun removeFavoriteLegacy(id: String) {
+        val currentFavorites = getFavoritesLegacy()
         currentFavorites.remove(id)
-        storeFavorites(currentFavorites)
+        storeFavoritesLegacy(currentFavorites)
     }
 
-    private fun getFavorites(): MutableList<String> {
+    private fun getFavoritesLegacy(): MutableList<String> {
         with(sharedPreferences) {
             var list: List<String>
             val jsonString = getString(SHARED_PREFERENCES_POKEMONS_FAVORITED_KEY, null)
@@ -171,6 +230,7 @@ class PokeDexViewModel @Inject constructor(
             return list.toMutableList()
         }
     }
+    //>>>>><<<<<
 
     sealed class State {
         data class Success(
