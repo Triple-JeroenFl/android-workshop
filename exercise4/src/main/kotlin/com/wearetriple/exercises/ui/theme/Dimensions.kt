@@ -14,9 +14,5 @@ object Dimensions {
         val xx_large = 32.dp
         val xxx_large = 48.dp
     }
-
-    val pokemonListItemHeight = 148.dp
-    val roundedCornerSize = 64.dp
-    val pokomonFavoritedBorderWidth = 4.dp
-    val pokemonUnFavoritedBorderWidth = 0.dp
+    val roundedCornerSize = 16.dp
 }

@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">Inholland excersise 1</string>
+    <string name="app_name">Exercise 1</string>
+    <string name="value1">Exercise #1</string>
+    <string name="value2">I\'ve changed!</string>
 </resources>

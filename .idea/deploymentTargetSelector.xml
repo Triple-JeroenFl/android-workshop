@@ -22,7 +22,10 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="PokemonCard">
+      <SelectionState runConfigName="exercise5">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="exercise6">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

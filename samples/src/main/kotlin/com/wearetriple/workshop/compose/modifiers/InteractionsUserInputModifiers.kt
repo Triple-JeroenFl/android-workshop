@@ -13,7 +13,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 fun ModifierUserInteractionShowcase() {
     Box(
         modifier = Modifier
-            .clickable { /* On click action here, automatically adds a ripple effect */ }
+            .clickable { /* On click action here, automatically adds a Material Design ripple effect */ }
             .pointerInput(Unit) { // Many other user input processing options here
                 detectTapGestures(
                     onTap = {},

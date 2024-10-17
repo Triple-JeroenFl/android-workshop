@@ -1,10 +1,13 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlin.compose)
+    kotlin("kapt")
 }
 
 android {
-    namespace = "com.wearetriple.excersises"
+    namespace = "com.wearetriple.workshop"
     compileSdk = 34
 
     defaultConfig {
@@ -34,9 +37,6 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.7"
-    }
 }
 
 dependencies {
@@ -57,4 +57,27 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.extensions)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.dagger.hilt.core)
+    implementation(libs.dagger.hilt.android)
+    kapt(libs.dagger.hilt.compiler)
+    implementation(libs.kotlinx.serialization.json)
+
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.moshi)
+    implementation(libs.moshi.adapters)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.moshi)
+
+    implementation(libs.androidx.paging.runtime)
+    implementation(libs.androidx.paging.compose)
+    implementation(libs.coil)
+    implementation(libs.coil.compose)
+
+    implementation(libs.androidx.datastore.preferences)
 }
